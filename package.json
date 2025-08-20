@@ -1,0 +1,21 @@
+{
+  "name": "vibecircles-coming-soon",
+  "version": "1.0.0",
+  "description": "VibeCircles Coming Soon Page with Email Collection",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build required'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["coming-soon", "email-collection", "vercel"],
+  "author": "VibeCircles",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@vercel/node": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
