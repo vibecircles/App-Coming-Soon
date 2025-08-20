@@ -1,5 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+import { neon } from '@neondatabase/serverless';
+
+const sql = neon(process.env.DATABASE_URL);
 
 export default async function handler(req, res) {
   // Only allow POST requests
@@ -15,45 +16,34 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Invalid email address' });
     }
 
-    // Path to the emails JSON file
-    const emailsPath = path.join(process.cwd(), 'data', 'subscribers.json');
-    
-    // Ensure data directory exists
-    const dataDir = path.dirname(emailsPath);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    // Read existing emails or create empty array
-    let emails = [];
-    if (fs.existsSync(emailsPath)) {
-      const fileContent = fs.readFileSync(emailsPath, 'utf8');
-      emails = JSON.parse(fileContent);
-    }
+    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     // Check if email already exists
-    if (emails.includes(email)) {
+    const existingSubscriber = await sql`
+      SELECT id FROM subscribers WHERE email = ${email}
+    `;
+
+    if (existingSubscriber.length > 0) {
       return res.status(200).json({ message: 'Email already subscribed' });
     }
 
-    // Add new email with timestamp
-    const subscriber = {
-      email: email,
-      subscribedAt: new Date().toISOString(),
-      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
-    };
+    // Insert new subscriber
+    await sql`
+      INSERT INTO subscribers (email, ip_address) 
+      VALUES (${email}, ${ipAddress})
+    `;
 
-    emails.push(subscriber);
-
-    // Write back to file
-    fs.writeFileSync(emailsPath, JSON.stringify(emails, null, 2));
+    // Get total subscriber count
+    const countResult = await sql`
+      SELECT COUNT(*) as total FROM subscribers WHERE status = 'active'
+    `;
 
     // Log subscription (optional)
     console.log(`New subscription: ${email}`);
 
     return res.status(200).json({ 
       message: 'Successfully subscribed!',
-      totalSubscribers: emails.length
+      totalSubscribers: parseInt(countResult[0].total)
     });
 
   } catch (error) {

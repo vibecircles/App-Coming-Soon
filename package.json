@@ -11,7 +11,9 @@
   "keywords": ["coming-soon", "email-collection", "vercel"],
   "author": "VibeCircles",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.0"
+  },
   "devDependencies": {
     "@vercel/node": "^3.0.0"
   },
