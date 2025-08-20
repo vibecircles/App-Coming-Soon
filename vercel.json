@@ -23,10 +23,5 @@
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ],
-  "functions": {
-    "api/subscribe.js": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }
